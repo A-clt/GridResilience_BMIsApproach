@@ -25,4 +25,4 @@ In ``constant.py``, you can set up the simulation settings.
 
 For running a simulation, run ``Simulator.py`` in the main folder. It will create two subfolders: Figures and LTIs. In LTIs, you'll find .txt files with matrices for the LTI systems (stable and unstable modes, stable mode is mode 1). In Figures, you'll find a pdf file with simulation plots, saved under the name filename specified in constant.py. 
 
-For getting the $$\\tau_a^{\\mathrm{bound}}$$ bound, run ``LMI_solver.py``.  
+For getting the $\\tau_a^{\\mathrm{bound}}$ bound, run ``LMI_solver.py``.  
