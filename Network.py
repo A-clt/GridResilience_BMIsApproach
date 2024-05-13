@@ -1,14 +1,12 @@
 #import numpy as np
 from lib import *
-from dataclasses import dataclass
+from constant import Kg, Tsm
 
 Sbase = 100
 Vbase = 230
 omega_syn = 2*np.pi*60
 nb = 39
 ng = 10
-Kg = 1/0.05
-Tsm = 2
 
 @dataclass
 class Generator:

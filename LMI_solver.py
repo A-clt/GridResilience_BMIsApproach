@@ -1,8 +1,6 @@
 from AttacksModel import Attacks
-from pyomo.environ import *
-import cvxpy as cv
-import pyomo.environ as pyo
-import numpy as np
+from lib import *
+
 # for pyomo
 def array_to_dict(array):
     rows, cols = array.shape
@@ -14,7 +12,6 @@ def array_to_dict(array):
 
 class LMI_solver():
       def __init__(self):
-            self.tau_a = 0
             self.At = Attacks()
             self.Au1 = self.At.LTI_dic[2].A
             self.Au2 = self.At.LTI_dic[3].A
@@ -22,15 +19,11 @@ class LMI_solver():
             self.Au4 = self.At.LTI_dic[5].A
             self.Au5 = self.At.LTI_dic[6].A
             self.A = self.At.LTI_dic[1].A
-            print(np.linalg.eigvals(self.A))
-            input()
             self.m = pyo.ConcreteModel()
             self.tau_a = list()
             self.c_prime_list = list()
             self.c_list = list()
             self.solve_model_CVXPY()
-
-
 
       def model_CVXPY(self):
             # create optimization variable
@@ -53,51 +46,28 @@ class LMI_solver():
       
       def solve(self):
             try:
-                  self.optprob.solve('MOSEK')
+                  self.optprob.solve('CLARABEL')
                   if self.optprob.status=='optimal':
                         if self.check_inequalities(self.P.value,self.c.value,self.c_prime.value):
                               self.c_prime_list.append(self.c_prime.value)
                               self.c_list.append(self.c.value)
-                              tau_a = self.compute_tau_a()
-                              print('Tau a')
-                              print(tau_a)
-                              input()
+                              tau_a = (self.c_prime.value+self.c.value)/(self.c.value)
                               self.tau_a.append(tau_a) 
             except cv.error.SolverError:
                   pass                     
 
-      def compute_tau_a(self):
-            max_norm = 0
-            for q in range(1,6):
-                  print(self.P.value@np.linalg.inv(self.At.LTI_dic[q].A)@self.At.LTI_dic[q].B)
-                  norm = np.linalg.norm(self.P.value@np.linalg.inv(self.At.LTI_dic[q].A)@self.At.LTI_dic[q].B, ord=2)
-                  print('Norm')
-                  print(norm)
-                  if norm>max_norm:
-                        max_norm = norm
-            print('Max Norm')
-            print(max_norm)
-            print('Min eigenvalue')
-            print(min(np.linalg.eigvals(self.P.value)))
-            print('Condition number')
-            print(np.linalg.cond(self.P.value))
-            print('Should be positive')
-            print(self.c.value-(2*max_norm*np.exp(self.At.N0+(self.c.value+self.c_prime.value)*self.At.T0))/(2*min(np.linalg.eigvals(self.P.value))))            
-            return (self.c_prime.value+self.c.value)/(self.c.value-(2*max_norm*np.exp(self.At.N0+(self.c.value+self.c_prime.value)*self.At.T0))/(2*min(np.linalg.eigvals(self.P.value))))
-
       def solve_model_CVXPY(self):
             c = np.arange(0.1,1,0.1)
-            c_prime = np.arange(1,10,1)
+            c_prime = np.arange(1,10,0.25)
             self.model_CVXPY()
             for j in range(len(c)):
                   for i in range(len(c_prime)):
-                        if (1+c_prime[i]/c[j])>10000000:
+                        if (1+c_prime[i]/c[j])>100:
                               pass
                         else:
                               self.c.value = c[j]
                               self.c_prime.value = c_prime[i]
-                              self.solve()
-            print(self.tau_a)                   
+                              self.solve()                
             minpos = self.tau_a.index(min(self.tau_a))      
             print('Bound on tau_a:%.3f, value of lambda_s:%.3f, value of lambda_u:%.3f'%(min(self.tau_a),self.c_list[minpos],self.c_prime_list[minpos]))
 

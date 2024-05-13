@@ -1,21 +1,20 @@
-#import numpy as np
 from lib import *
 from BuildSystems import LTI_system
-from constant import dt
-tau_z = 10
+from constant import dt, tau_z, Part_Factors, tau_d, N0, tau_a, T0, M_DERS, D_DERS
+
 class Attacks():
       def __init__(self):
-            self.tau_d = 2
-            self.N0 = 5
-            self.tau_a = 4
-            self.T0 = 2
+            self.tau_d = tau_d
+            self.N0 = N0
+            self.tau_a = tau_a
+            self.T0 = T0
             self.LTI_dic = {
-                  1: LTI_system(40,1.5,tau_z,alpha='EquivalentSharing'),
-                  2: LTI_system(40,-100,tau_z,alpha='EquivalentSharing'),
-                  3: LTI_system(40,-200,tau_z,alpha='EquivalentSharing'),
-                  4: LTI_system(40,-150,tau_z,alpha='EquivalentSharing'),
-                  5: LTI_system(40,-120,tau_z,alpha='EquivalentSharing'),                  
-                  6: LTI_system(40,-170,tau_z,alpha='EquivalentSharing'),
+                  1: LTI_system(M_DERS[0],D_DERS[0],tau_z,alpha=Part_Factors),
+                  2: LTI_system(M_DERS[1],D_DERS[1],tau_z,alpha=Part_Factors),
+                  3: LTI_system(M_DERS[2],D_DERS[2],tau_z,alpha=Part_Factors),
+                  4: LTI_system(M_DERS[3],D_DERS[3],tau_z,alpha=Part_Factors),
+                  5: LTI_system(M_DERS[4],D_DERS[4],tau_z,alpha=Part_Factors),                  
+                  6: LTI_system(M_DERS[5],D_DERS[5],tau_z,alpha=Part_Factors),
             }
             self.Q = [1,2,3,4,5,6]
             self.Qu = [2,3,4,5,6]
@@ -28,9 +27,11 @@ class Attacks():
             self.Bd = self.LTI_dic[1].Bd  
             self.A = self.LTI_dic[1].A
             self.B = self.LTI_dic[1].B  
+            if not os.path.exists('LTIs'):
+                  os.makedirs('LTIs')
             for i in range(1,7):
-                  np.savetxt('A%d.txt'%i,self.LTI_dic[i].A)             
-            np.savetxt("B.txt",self.B)
+                  np.savetxt('LTIs//A%d.txt'%i,self.LTI_dic[i].A)             
+            np.savetxt("LTIs//B.txt",self.B)
       def C(self):
             if (0<=self.adttimer and self.adttimer<=self.N0) and (0<=self.aattimer and self.aattimer<=self.T0):
                   self.flow=1

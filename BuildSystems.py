@@ -1,7 +1,7 @@
 #import numpy as np
 from lib import *
 from Network import loadIEEE39bus
-from constant import dt
+from constant import dt, beta
 
 class LTI_system():
       def __init__(self,M_DERS,D_DERS,Tz,alpha='ProportionalSharing'):
@@ -11,7 +11,7 @@ class LTI_system():
             self.Tz = Tz
             self.set_alpha(alpha)
             self.build_params_mat()
-            self.beta = -0.1
+            self.beta = beta
             self.build_A_mat()
             self.build_B_mat()
             self.c2d()
@@ -22,7 +22,7 @@ class LTI_system():
             elif alpha=='ProportionalSharing':
                   self.alpha = np.ones((self.ng,1))
                   i = 0
-                  for key,value in self.gen.items():
+                  for _,value in self.gen.items():
                         self.alpha[i] = value.Sgen
                   self.alpha = self.alpha/sum(self.alpha)
             elif alpha=='RandomDispatch':
@@ -39,7 +39,7 @@ class LTI_system():
             self.Tg = np.zeros((self.ng,self.ng))
             self.Kp = np.zeros((self.ng,1))
             idx=0
-            for key,value in self.gen.items():
+            for _,value in self.gen.items():
                   M[value.bus-1] = 2*value.H*value.Sgen/self.Sbase
                   D[value.bus-1] = value.D
                   self.Tg[idx][idx] = value.Tsm
