@@ -1,7 +1,7 @@
 # On the Stability of Power Transmission Systems Under Persistent Inverter Attacks: A Bi-Linear Matrix Approach 
 
 <p align="center" width="100%">
-    <img width="60%" src="images/ill_fig.png">
+    <img width="40%" src="images/ill_fig.png">
 </p>
  
 ## Installation
